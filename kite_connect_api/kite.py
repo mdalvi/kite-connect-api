@@ -8,7 +8,7 @@ from requests.exceptions import Timeout, ConnectionError
 
 class Kite(object):
     def __init__(self, **kite_credentials):
-        self.kite = KiteConnect(**kite_credentials, debug=True)
+        self.kite = KiteConnect(**kite_credentials)
         self.sw_place_order = time.time()
         self.nb_place_order = 0
 
@@ -19,14 +19,14 @@ class Kite(object):
             try:
                 if func_name == 'place_order':
                     if self.nb_place_order >= 5:
+                        self.nb_place_order = 0
                         if (time.time() - self.sw_place_order) < 1.0:
                             time.sleep(max(0.0, 1.0 - (time.time() - self.sw_place_order)))
-                        self.nb_place_order = 0
 
                     response = getattr(self.kite, func_name)(*args, **kwargs)
+                    self.nb_place_order += 1
                     if self.nb_place_order == 0:
                         self.sw_place_order = time.time()
-                    self.nb_place_order += 1
                 else:
                     response = getattr(self.kite, func_name)(*args, **kwargs)
                 break
