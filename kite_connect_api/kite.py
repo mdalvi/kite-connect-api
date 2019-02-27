@@ -2,7 +2,7 @@ import logging
 import time
 
 from kiteconnect import KiteConnect
-from kiteconnect.exceptions import NetworkException, KiteException
+from kiteconnect.exceptions import NetworkException, KiteException, DataException
 from requests.exceptions import Timeout, ConnectionError
 
 
@@ -31,13 +31,16 @@ class Kite(object):
                     response = getattr(self.kite, func_name)(*args, **kwargs)
                 break
             except ConnectionError as ex:
-                logger.warning("requests.exceptions.ConnectionError @ [{}]".format(repr(ex)))
+                logger.warning("requests.exceptions.ConnectionError @ [{}]".format(repr(ex)), exc_info=True)
             except Timeout as ex:
-                logger.warning("requests.exceptions.Timeout @ [{}]".format(repr(ex)))
+                logger.warning("requests.exceptions.Timeout @ [{}]".format(repr(ex)), exc_info=True)
             except NetworkException as ex:
-                logger.warning("kiteconnect.exceptions.NetworkException @ [{}]".format(repr(ex)))
+                logger.warning("kiteconnect.exceptions.NetworkException @ [{}]".format(repr(ex)), exc_info=True)
+                time.sleep(1)
+            except DataException as ex:
+                logger.warning("kiteconnect.exceptions.DataException @ [{}]".format(repr(ex)), exc_info=True)
                 time.sleep(1)
             except KiteException as ex:
-                logger.warning("kiteconnect.exceptions.KiteException @ [{}]".format(repr(ex)))
+                logger.warning("kiteconnect.exceptions.KiteException @ [{}]".format(repr(ex)), exc_info=True)
                 break
         return response
